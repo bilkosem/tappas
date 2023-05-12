@@ -15,7 +15,7 @@ class YoloParams
 public:
     float iou_threshold;
     float detection_threshold;
-    std::map<std::uint8_t, std::string> labels;
+    std::map<std::uint16_t, std::string> labels;
     uint num_classes;
     uint max_boxes;
     std::vector<std::vector<int>> anchors_vec;
@@ -30,7 +30,6 @@ class Yolov3Params : public YoloParams
 public:
     Yolov3Params()
     {
-        labels = common::coco_eighty;
         max_boxes = 200;
         anchors_vec =
             {
@@ -45,7 +44,6 @@ class Yolov4Params : public YoloParams
 public:
     Yolov4Params()
     {
-        labels = common::coco_eighty;
         max_boxes = 200;
         anchors_vec = {
             {142, 110, 192, 243, 459, 401},
@@ -59,7 +57,6 @@ class Yolov5Params : public YoloParams
 public:
     Yolov5Params()
     {
-        labels = common::coco_eighty;
         max_boxes = 200;
         anchors_vec = {
             {116, 90, 156, 198, 373, 326},

@@ -35,11 +35,11 @@ protected:
     float _iou_thr;
     uint m_image_width;
     uint m_image_height;
-    std::map<uint8_t, std::string> m_dataset;
+    std::map<uint16_t, std::string> m_dataset;
 
 public:
     virtual ~YoloPost() = default;
-    YoloPost(std::map<uint8_t, std::string> dataset,
+    YoloPost(std::map<uint16_t, std::string> dataset,
              float detection_threshold,
              float iou_threshold,
              uint max_boxes)
@@ -461,7 +461,7 @@ YoloParams *init(const std::string config_path, const std::string function_name)
     else
     {
         params = new YoloParams;
-        char config_buffer[4096];
+        char config_buffer[8192];
         const char *json_schema = R""""({
         "$schema": "http://json-schema.org/draft-04/schema#",
         "type": "object",
@@ -529,7 +529,7 @@ YoloParams *init(const std::string config_path, const std::string function_name)
             uint i = 0;
             for (auto &v : labels)
             {
-                params->labels.insert(std::pair<std::uint8_t, std::string>(i, v.GetString()));
+                params->labels.insert(std::pair<std::uint16_t, std::string>(i, v.GetString()));
                 i++;
             }
             // parse anchors

@@ -8,7 +8,7 @@
  **/
 
 #include "detection_app.hpp"
-
+#include <chrono>
 
 hailo_status create_feature(hailo_output_vstream vstream,
                             std::shared_ptr<FeatureData> &feature)
@@ -61,7 +61,7 @@ hailo_status post_processing_all(std::vector<std::shared_ptr<FeatureData>> &feat
     auto status = HAILO_SUCCESS;
 
     YoloParams *init_params = init(CONFIG_FILE, "yolov5");
-
+    
     std::sort(features.begin(), features.end(), &FeatureData::sort_tensors_by_size);
     for (size_t i = 0; i < frames_count; i++)
     {
@@ -184,7 +184,8 @@ hailo_status run_inference_threads(hailo_input_vstream input_vstream, hailo_outp
 {
     // Create features data to be used for post-processing
     std::vector<std::shared_ptr<FeatureData>> features;
-
+    std::chrono::duration<double> postprocess_time;
+    std::chrono::time_point<std::chrono::system_clock> t_start = std::chrono::high_resolution_clock::now();
     features.reserve(output_vstreams_size);
     for (size_t i = 0; i < output_vstreams_size; i++)
     {
@@ -214,6 +215,7 @@ hailo_status run_inference_threads(hailo_input_vstream input_vstream, hailo_outp
     // Create post-process thread
     auto pp_thread(std::async(post_processing_all, std::ref(features), frames_count, std::ref(input_images)));
 
+    std::chrono::time_point<std::chrono::system_clock> t_1 = std::chrono::high_resolution_clock::now();
     // End threads
     hailo_status out_status = HAILO_SUCCESS;
     for (size_t i = 0; i < output_threads.size(); i++)
@@ -224,8 +226,25 @@ hailo_status run_inference_threads(hailo_input_vstream input_vstream, hailo_outp
             out_status = status;
         }
     }
+    std::chrono::time_point<std::chrono::system_clock> t_2 = std::chrono::high_resolution_clock::now();
+
     auto input_status = input_thread.get();
+
+    std::chrono::time_point<std::chrono::system_clock> t_3 = std::chrono::high_resolution_clock::now();
+
     auto pp_status = pp_thread.get();
+    std::chrono::time_point<std::chrono::system_clock> t_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> infer_and_pp_time = t_end - t_start;
+    std::chrono::duration<double> output_time = t_2 - t_1;
+    std::chrono::duration<double> input_time = t_3 - t_2;
+    std::chrono::duration<double> pp_time = t_end - t_3;
+
+    std::cout << "Total time:   " << infer_and_pp_time.count() << " sec" << std::endl;
+    std::cout << "Average FPS:  " << frames_count / (infer_and_pp_time.count()) << std::endl;
+    std::cout << "infer_and_pp_time:      " << 1.0 / (frames_count / (infer_and_pp_time.count()) / 1000) << " ms" << std::endl;
+    std::cout << "output_time:  " << 1.0 / (frames_count / (output_time.count()) / 1000) << " ms" << std::endl;
+    std::cout << "input_time:   " << 1.0 / (frames_count / (input_time.count()) / 1000) << " ms" << std::endl;
+    std::cout << "Epp_time:      " << 1.0 / (frames_count / (pp_time.count()) / 1000) << " ms" << std::endl;
 
     if (HAILO_SUCCESS != input_status)
     {
