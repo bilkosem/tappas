@@ -8,8 +8,8 @@ function init_variables() {
 
     readonly RESOURCES_DIR="$TAPPAS_WORKSPACE/apps/h8/gstreamer/general/multistream_detection/resources"
     readonly POSTPROCESS_DIR="$TAPPAS_WORKSPACE/apps/h8/gstreamer/libs/post_processes/"
-    readonly POSTPROCESS_SO="$POSTPROCESS_DIR/libyolo_hailortpp_post.so"
-    readonly HEF_PATH="$RESOURCES_DIR/yolov5m_wo_spp_60p.hef"
+    readonly POSTPROCESS_SO="$POSTPROCESS_DIR/libyolo_post.so"
+    readonly HEF_PATH="$RESOURCES_DIR/custom_yolov5m_Objects365.hef"
 
     num_of_src=12
     live_src=""
@@ -106,9 +106,9 @@ function main() {
     pipeline="gst-launch-1.0 \
            hailoroundrobin mode=0 name=fun ! \
            queue name=hailo_pre_infer_q_0 leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-           hailonet hef-path=$HEF_PATH nms-score-threshold=0.3 nms-iou-threshold=0.45 output-format-type=HAILO_FORMAT_TYPE_FLOAT32 ! \
+           hailonet hef-path=$HEF_PATH ! \
            queue name=hailo_postprocess0 leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-           hailofilter so-path=$POSTPROCESS_SO qos=false ! \
+           hailofilter function-name=yolov5 so-path=$POSTPROCESS_SO qos=false ! \
            queue name=hailo_draw0 leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
            hailooverlay ! \
            hailostreamrouter name=sid $streamrouter_input_streams compositor name=comp start-time-selection=0 $compositor_locations ! \

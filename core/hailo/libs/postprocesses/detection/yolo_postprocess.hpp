@@ -15,13 +15,13 @@ class YoloParams
 public:
     float iou_threshold;
     float detection_threshold;
-    std::map<std::uint8_t, std::string> labels;
+    std::map<std::uint16_t, std::string> labels;
     uint num_classes;
     uint max_boxes;
     std::vector<std::vector<int>> anchors_vec;
     std::string output_activation; // can be "none" or "sigmoid"
     int label_offset;
-    YoloParams() : iou_threshold(0.45f), detection_threshold(0.3f), output_activation("none"), label_offset(1) {}
+    YoloParams() : iou_threshold(0.1f), detection_threshold(0.5f), output_activation("none"), label_offset(1) {}
     void check_params_logic(uint num_classes_tensors);
 };
 

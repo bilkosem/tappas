@@ -35,11 +35,11 @@ protected:
     float _iou_thr;
     uint m_image_width;
     uint m_image_height;
-    std::map<uint8_t, std::string> m_dataset;
+    std::map<uint16_t, std::string> m_dataset;
 
 public:
     virtual ~YoloPost() = default;
-    YoloPost(std::map<uint8_t, std::string> dataset,
+    YoloPost(std::map<uint16_t, std::string> dataset,
              float detection_threshold,
              float iou_threshold,
              uint max_boxes)
